@@ -7,7 +7,9 @@
 
 __author__ = "Benny <benny.think@gmail.com>"
 
+import base64
 import logging
+import pathlib
 
 import ffmpeg
 
@@ -85,6 +87,13 @@ def get_metadata(video_path):
     except Exception as e:
         logging.error(e)
 
-    thumb = video_path + "-thunmnail.png"
+    # abc %2.mov will become abc  so we base64 video name
+    p = pathlib.Path(video_path)
+    thumb = p.parent.joinpath(base64.b64encode(p.name.encode("u8")).decode("u8")).as_posix() + "-thunmnail.png"
     ffmpeg.input(video_path, ss=duration / 2).filter('scale', width, -1).output(thumb, vframes=1).run()
     return dict(height=height, width=width, duration=duration, thumb=thumb)
+
+
+if __name__ == '__main__':
+    v = "/Users/benny/Desktop/abc %2.mov"
+    get_metadata(v)
